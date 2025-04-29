@@ -32,9 +32,12 @@ fi
 echo "🔄 Restarting Zabbix server ..."
 sudo systemctl restart zabbix-server
 
-echo "🚀 Starting snmptrapd in background (manual method)..."
+echo "🚫 Disabling systemd-controlled snmptrapd..."
+sudo systemctl disable --now snmptrapd 2>/dev/null || true
+
+echo "🚀 Starting snmptrapd manually in background..."
 sudo pkill snmptrapd || true
-nohup sudo /usr/sbin/snmptrapd -f -On -Lf /var/log/snmptrapd.log -c /etc/snmp/snmptrapd.conf >/dev/null 2>&1 &
+nohup sudo /usr/sbin/snmptrapd -On -Lf /var/log/snmptrapd.log -c /etc/snmp/snmptrapd.conf >/dev/null 2>&1 &
 
 echo "🕒 Ensuring snmptrapd starts at boot (via crontab)..."
 if ! crontab -l | grep -q snmptrapd; then
